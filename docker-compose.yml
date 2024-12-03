@@ -1,0 +1,11 @@
+version: '3.7'
+services:
+  web:
+    image: 'sleep-company-ui:latest'
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sleep-company-ui
+    restart: always
+    ports:
+      - "5001:3000"

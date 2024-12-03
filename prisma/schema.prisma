@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model users {
+  id                  Int            @id @default(autoincrement())
+  name                String
+  email               String?
+  mobile              String?        @unique(map: "Users_mobile_key")
+  dateOfBirth         String?
+  gender              String?
+  height              Int?
+  weight              Int?
+  otp                 String?
+  otp_expired         DateTime?
+  location_name       String?
+  is_welcome_screen   Boolean?
+  mobile_device_id    String?
+  mobile_device_token String?        @db.LongText
+  isLoggedIn          Boolean?
+  image_url           String?        @db.LongText
+  roleId              Int?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @default(now()) @updatedAt
+  password            String?
+  is_registered       Boolean?       @default(false)
+  device              Device[]
+  SleepHistory        SleepHistory[]
+  roles               roles?         @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_role")
+
+  @@index([roleId], map: "fk_role")
+}
+
+model roles {
+  id         Int      @id @default(autoincrement())
+  name       String?
+  permission String?
+  status     String   @default("Active") @db.VarChar(100)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  users      users[]
+}
+
+model Device {
+  id                 Int             @id @default(autoincrement())
+  device_name        String?
+  device_type        String?
+  device_description String?         @db.LongText
+  user_id            Int?
+  oth_users          Json?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime?
+  device_mac         String?
+  device_id          String?
+  users              users?          @relation(fields: [user_id], references: [id], map: "Device_user_id_fkey")
+  deviceDetails      DeviceDetails[]
+
+  @@index([user_id], map: "DeviceDetails_user_id_fkey")
+}
+
+model DeviceDetails {
+  id                      Int      @id @default(autoincrement())
+  device_id               Int
+  user_id                 Int?
+  connection_status       String
+  connected_date          DateTime @default(now())
+  disconnected_date       DateTime @default(now()) @updatedAt
+  total_connected_time    Int?     @default(0)
+  total_disconnected_time Int?     @default(0)
+  device                  Device   @relation(fields: [device_id], references: [id], onDelete: Cascade)
+
+  @@index([device_id])
+}
+
+model SleepHistory {
+  id                      BigInt    @id @unique(map: "id") @default(autoincrement()) @db.UnsignedBigInt
+  sleepScore              Int?
+  leaveBedTime            Int?
+  awakeTime               Int?
+  breathRate              Json?
+  awakeSleep              Int?
+  midSleep                Int?
+  deepSleep               Int?
+  leaveBedTimes           Int?
+  fallSleepTimeStamp      BigInt?
+  wakeupTimeStamp         BigInt?
+  turnTime                Int?
+  sleepCurveArray         Json?
+  startTime               BigInt?
+  avgBreathRate           Int?
+  avgHeartRate            Int?
+  heartRate               Json?
+  recordCount             Int?
+  endTime                 BigInt?
+  lightSleep              Int?
+  minute                  Int?
+  hour                    Int?
+  createdAt               DateTime? @default(now()) @db.Timestamp(0)
+  updatedAt               DateTime? @default(now()) @db.Timestamp(0)
+  userId                  Int?
+  syncDate                BigInt?
+  apena                   BigInt?
+  turnOverStatusAry       Json?
+  trunOverTimes           Int?
+  deepSleepAllTime        Int?
+  bradypnea               Int?
+  restless                Int?
+  upNightMore             Int?
+  actualSleepLong         Int?
+  fallAsleepHard          Int?
+  abnormalBreathing       Int?
+  startSleepTimeTooLatter Int?
+  wakeTimesTooMuch        Int?
+  benignSleep             Int?
+  users                   users?    @relation(fields: [userId], references: [id], map: "SleepHistory_user_id_fkey")
+
+  @@index([userId], map: "SleepHistory_user_id_fkey")
+}
+
+model DeletedUser {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  name        String
+  email       String?
+  mobile      String?
+  dateOfBirth String?
+  gender      String?
+  height      String?
+  weight      String?
+  deletedAt   DateTime @default(now())
+}
